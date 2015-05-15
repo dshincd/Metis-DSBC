@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+</head>
+
+<style>
+body {
+  font: 14px sans-serif;
+}
+
+.bar {
+  fill: #080090;
+  shape-rendering: crispEdges;
+}
+
+.bar text {
+  fill: #fff;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+p {
+  font-size: 18px;
+}
+
+#features {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  margin: 20px;
+  border-radius: 3px;
+  box-shadow: 2px 4px 10px 3px #eee;
+}
+</style>
+
+<body>
+  <div id="canvas"></div>
+  <div id="features">
+    <p>
+      What is your gender?
+      <select q = "0">
+        <option val = "all">All</option>
+        <option val = "male">Male</option>
+        <option val = "female">Female</option>
+      </select>
+    </p>
+
+    <p>
+      What is your age?
+      <select q = "1">
+        <option val = "all">All</option>
+        <option val = "twenties">20-29</option>
+        <option val = "thirties">30-39</option>
+        <option val = "fourties">40-49</option>
+        <option val = "fifties">50-59</option>
+        <option val = "sixties">60-69</option>
+        <option val = "seventies">70-79</option>
+      </select>
+    </p>
+    <p>
+      What is your cholesterol?
+      <select q = "2">
+        <option val = "all">All</option>
+        <option val = "normal_chol">Normal (< 200 mg/dL)</option>
+        <option val = "mod_chol">Borderline (200-240 mg/dL)</option>
+        <option val = "high_chol">High (> 240 mg/dL)</option>
+      </select>
+    </p>
+    <p>
+      Chest pain when exercising?
+      <select q = "3">
+        <option val = "all">All</option>
+        <option val = "exer_angina">Yes</option>
+        <option val = "no_angina">No</option>
+      </select>
+    </p>
+    <p>
+      Relieved after rest?
+      <select q = "4">
+        <option val = "all">All</option>
+        <option val = "relieve_rest">Yes</option>
+        <option val = "no_relieve">No</option>
+      </select>
+    </p>
+    </div>
+
+<script>
+
+function convert_data(values) {
+    var new_obj = {};
+    for (key in values) {
+        new_arr = [];
+        for (var i=0; i<values[key].length; i++) {
+            small_obj = {};
+            small_obj['x'] = i * 2;
+            small_obj['y'] = values[key][i];
+            small_obj['dx'] = 2;
+            new_arr.push(small_obj);
+        }
+        new_obj[key] = new_arr;
+    }
+    return new_obj;
+}
+
+var data;
+
+$.ajaxSetup({
+  async: false
+})
+$.getJSON('histogram_data3.json', function(values){
+    data = convert_data(values)
+});
+$.ajaxSetup({
+  async: true
+})
+
+    var margin = {top: 10, right: 120, bottom: 50, left: 30},
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    var svg = d3.select("#canvas").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+var key = ["all","all","all","all","all"];
+
+$(document).on('change','select',function(){
+  var index = parseInt($(this).attr("q"));
+  key[index] = $('option:selected', this).attr('val');
+  var key2 = key.toString()
+  create_graph(data, key2);
+});
+
+function create_graph (data, key) {
+    var formatCount = d3.format(",.0f");
+
+    var x = d3.scale.linear()
+        .domain([0, 100])
+        .range([0, width]);
+
+    var y = d3.scale.linear()
+        .domain([0, d3.max(data[key], function(d) { return d.y; })])
+        .range([height, 0]);
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom");
+
+    var bar = svg.selectAll("rect")
+        .data(data[key]);
+
+    bar.enter()
+      .append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) { return x(d.x); })
+        .attr("width", function(d) { return x(d.dx) - 1; })
+        .attr("height", function(d) { return 0; });
+
+    bar
+      .transition()
+        .ease("quad-in-out")
+        .duration(600)
+        .attr("y", function(d) { return y(d.y); })
+        .attr("height", function(d) { return height - y(d.y); });
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    svg.append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "middle")
+        .attr("x", width/2)
+        .attr("y", height +50)
+        .attr("font-size", 20)
+        .text("Percent likelihood of heart disease");
+}
+
+create_graph(data, "all,all,all,all,all")
+
+</script>
+</body>
+</html>
