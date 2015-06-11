@@ -4,15 +4,17 @@
   <meta charset="utf-8">
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <h1>Predicting heart disease</h1>
 </head>
 
 <style>
 body {
   font: 14px sans-serif;
+  background-color: #F9F5E2;
 }
 
 .bar {
-  fill: #080090;
+  fill: #8A314A;
   shape-rendering: crispEdges;
 }
 
@@ -39,7 +41,9 @@ p {
   margin: 20px;
   border-radius: 3px;
   box-shadow: 2px 4px 10px 3px #eee;
+  word-wrap: break-word;
 }
+
 </style>
 
 <body>
@@ -55,7 +59,7 @@ p {
     </p>
 
     <p>
-      What is your age?
+      How old are you?
       <select q = "1">
         <option val = "all">All</option>
         <option val = "twenties">20-29</option>
@@ -76,7 +80,7 @@ p {
       </select>
     </p>
     <p>
-      Chest pain when exercising?
+      Do you get chest pain when exercising?
       <select q = "3">
         <option val = "all">All</option>
         <option val = "exer_angina">Yes</option>
@@ -84,7 +88,7 @@ p {
       </select>
     </p>
     <p>
-      Relieved after rest?
+      Does it become relieved after rest?
       <select q = "4">
         <option val = "all">All</option>
         <option val = "relieve_rest">Yes</option>
@@ -124,8 +128,8 @@ $.ajaxSetup({
 })
 
     var margin = {top: 10, right: 120, bottom: 50, left: 30},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+        width = 768 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
     var svg = d3.select("#canvas").append("svg")
         .attr("width", width + margin.left + margin.right)
@@ -150,7 +154,8 @@ function create_graph (data, key) {
         .range([0, width]);
 
     var y = d3.scale.linear()
-        .domain([0, d3.max(data[key], function(d) { return d.y; })])
+        .domain([0,1])
+        // .domain([0, d3.max(data[key], function(d) { return d.y; })])
         .range([height, 0]);
 
     var xAxis = d3.svg.axis()
@@ -183,8 +188,8 @@ function create_graph (data, key) {
         .attr("class", "x label")
         .attr("text-anchor", "middle")
         .attr("x", width/2)
-        .attr("y", height +50)
-        .attr("font-size", 20)
+        .attr("y", height +45)
+        .attr("font-size", 18)
         .text("Percent likelihood of heart disease");
 }
 
