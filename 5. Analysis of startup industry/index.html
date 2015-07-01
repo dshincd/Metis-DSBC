@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../favicon.ico">
+
+    <title>Startup Finder</title>
+
+    <!-- Bootstrap core CSS -->
+    <!-- <link href="/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+  </head>
+  <style>
+  .page-header {
+    width: 810px;
+    margin: 40px auto;
+  }
+  #results {
+    padding-top: 50px;
+  }
+
+  #results > li {
+    width: 700px;
+    display: block;
+    padding: 55px 15px 15px;
+    background-color: #eee;
+    box-shadow: 1px 2px 15px 2px #ccc;
+    margin: 10px 0 30px;
+    position: relative;
+  }
+
+  .rank {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0 5px 5px;
+    border: 2px solid #000;
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 34px;
+    background-color: #fff;
+  }
+  .title {
+    font-size: 30px;
+    position: absolute;
+    top: 5px;
+    text-align: center;
+    width: 100%;
+  }
+  .items {
+    margin: 0;
+  }
+  .items > a {
+    text-decoration: none;
+  }
+  .company-logo {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    height: 60px;
+    width: auto;
+    cursor: pointer;
+    text-decoration: none;
+    z-index: 100;
+  }
+
+  .group:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+
+  .company-logo > img {
+    height: 60px;
+    width: auto;
+  }
+  #name {
+    width: 740px;
+  }
+  #neighborsSearch {
+    position: absolute;
+    top: 0;
+  }
+
+  .logo {
+    width: 101px;
+    height: 100px;
+    font-size: 80px;
+    background-color: blue;
+    padding: 0px 5px 5px 8px;
+    color: #fff;
+    float: left;
+  }
+
+  .logo-title {
+    font-size: 90px;
+    margin-left: 30px;
+    display: block;
+    float: left;
+    margin-top: 0px;
+  }
+
+  .lead {
+    clear: both;
+  }
+  </style>
+  <body>
+      <div class="container">
+
+      <div class="page-header">
+        <div class="logo">S<sup>3</sup></div>
+        <h1 class='logo-title'>Startup Finder</h1>
+          <p class="lead">Type in a company name or description</p>
+
+        <div class="input-group">
+
+          <input id="name" type="textbox" placeholder="Company name" class="form-control">
+          <span class="input-group-btn">
+            <button class="btn btn-default" type="button" id="neighborsSearch">Search</button>
+          </span>
+      </div>
+
+    <script>
+        $(document).keypress(function(e) {
+            if(e.which == 13) {
+                $("#neighborsSearch").click();
+            }
+        });
+      function get_results(company_name){
+        input_data = "{\"company_name\": \""+company_name+"\"}";
+        $.ajax({
+         type: "POST",
+         contentType: "application/json; charset=utf-8",
+         url: "/recommend",
+         dataType: "json",
+         async: true,
+         data: input_data,
+         success: function (data) {
+            var results = data.results;
+            $("#results").empty();
+            for (var i = 0; i < results.length; i++) {
+              var item = "<li><div>";
+              item += "<div class='rank'>" + results[i].Rank + "</div>";
+              // item += "<img class='company-logo' src='" + results[i].Image + "'>";
+              item += "<a class='group company-logo' href='" + results[i].Web + "' target='_blank'><img src='" + results[i].Images + "'></a>";
+              item += "<p class='title'>" + results[i].Company + "</p>";
+              item += "<p class='items'><b>Location:</b> " + results[i].Location + "</p>";
+              item += "<p class='items'><b>Founded:</b> " + results[i].Founded + "</p>";
+              item += "<p class='items'><b>Total Funding:</b> " + results[i].Funding + "</p>";
+              item += "<p class='items'><b>Categories:</b> " + results[i].Categories + "</p>";
+              item += "<p class='items'><b>Web: </b><a href='" + results[i].Web + "' target='_blank'>" + results[i].Web + "</a></p>";
+              item += "<div class='items'><b>Status: </b>" + results[i].Status + "</div>";
+              item += "<div class='items'><b>Description: </b>" + results[i].Description + "</div>";
+              item += "</div></li>";
+              $("#results").append(item);
+            }
+
+
+           },
+         error: function (result) {
+             }
+           })
+         }
+
+      document.getElementById('neighborsSearch').onclick = function() {
+        var search = document.getElementById('name').value;
+        console.log("IT WORKS!")
+        get_results(search);
+        }
+
+    </script>
+
+      <ul id="results">
+      </ul>
+
+    </div> <!-- /container
+
+  </body>
+</html>
